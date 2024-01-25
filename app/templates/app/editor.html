@@ -1,0 +1,103 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block content %}
+    <h1 class="title">Editor</h1>
+
+    <div class="container">
+        <button class="button" id="differentFileButton" onclick="redirectHome();">Choose a different file</button>
+        <button class="button" id="playPauseButton">Play</button>
+    </div>
+
+    <!-- SLIDER ELEMENTS -->
+    <div class="container" id="allSlidersContainer">
+        <div class="sliderContainer">
+            <p class="volumeText">Volume:&nbsp;</p>
+            <p class="volumeText" id="volumeValue">100</p>
+            <p class="volumeText">%</p>
+            <input type="range" min="0" max="150" value="100" step="1" class="slider" id="volumeSlider">
+        </div>
+
+        <div class="sliderContainer">
+            <p class="speedText">Speed:&nbsp;</p>
+            <p class="speedText" id="speedValue">1</p>
+            <p class="speedText">x</p>
+            <input type="range" min="0.5" max="1.5" value="1" step="0.05" class="slider" id="speedSlider">
+        </div>
+
+        <div class="sliderContainer">
+            <label class="panText" id="autoPanText">(<input type="checkbox" id="autoPanCheckbox">Auto)&nbsp;</label>
+            <p class="panText">Pan:&nbsp;</p>
+            <p class="panText" id="panValue">0</p>
+            <input type="range" min="-1" max="1" value="0" step="0.1" class="slider" id="panSlider">
+        </div>
+    </div>
+    
+    <div id="playBarContainer">
+        <div id="playBar"></div>
+    </div>
+
+    <audio src="{% get_media_prefix %}{{ data }}" id="audioPlayer"></audio>
+    <div class="container">
+        <button class="button" id="downloadButton" disabled>Export</button>
+        <p id="panWarningText">Note: panning features only available in browser.</p>
+        <p id="downloadingConfirmationText" style="display: none;">Exporting...</p>
+    </div>
+
+    <div id="dataSend" fileName="{{ data }}" style="display: none;"></div>
+
+    <button id="homeRedirectButton" style="display:none;" onclick="redirectHome();"></button>
+    <script>
+        // CODE FOR PASSING DATA TO VIEW FOR DELETION (WHICH IN TURN REDIRECTS TO HOME)
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                let cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    let cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function redirectHome() {
+            setTimeout(() => {
+                fetch("{% url 'delete_file' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: new URLSearchParams({
+                        'file_path': '{{ data }}'
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Network response was not ok: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Server response:', data);
+                    // Check the structure of the response and handle it accordingly
+                    // For example, you can check for a 'status' field and redirect based on it
+                    if (data.status === 'file deleted') {
+                        window.location.href = '{% url "home" %}';
+                    } else {
+                        console.error('Unexpected server response:', data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error during fetch:', error);
+                });
+            }, 5000);
+        }
+    </script>
+
+    <script src="{% static 'app/editor.js' %}"></script>
+{% endblock content %}
+

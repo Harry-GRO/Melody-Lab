@@ -1,0 +1,144 @@
+/* GENERAL */
+body {
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+    background-image: linear-gradient(to bottom right, #2b2b2b, #704f8c); /* Retro color scheme */
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    font-family: 'Courier New', monospace; /* Retro font */
+    color: #f5f5f5; /* Off-white text color for readability */
+}
+
+.container {
+    box-sizing: border-box;
+    margin: 0;
+    text-align: center;
+    overflow: hidden;
+    width: 100vw;
+    padding: 3vh;
+    display: flex;
+    flex-direction: column; /* Stack elements vertically for a retro look */
+    align-items: center;
+    gap: 2vh;
+}
+
+.title {
+    font-size: 4vw; /* Slightly smaller font size for the title */
+    text-align: center;
+    margin-top: 2vh; /* Reduced margin-top */
+}
+
+.subtitle {
+    font-size: 2.5vw; /* Slightly smaller font size for the subtitle */
+    text-align: center;
+    margin-top: 1.5vh; /* Reduced margin-top */
+}
+
+.button {
+    overflow: hidden;
+    font-size: 2vw;
+    background-color: #b5886c; /* Warm, muted button color */
+    color: #fff;
+    padding: 1vh 2vw; /* Increased padding for a button-like feel */
+    border: none;
+    border-radius: 0.5vw;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: #8d6d57; /* Darker color on hover for contrast */
+}
+
+.button:disabled {
+    display: none;
+}
+
+.authorTag {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    font-size: 2.5vh;
+}
+
+/* HOME */
+
+#id_file_field {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin: auto;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+form > p > label {
+    display: none;
+}
+
+form > p > input {
+    padding: 1.5vw; /* Increased input padding */
+    width: 30vw;
+    height: 5vh;
+    border-radius: 0.5vw;
+    background-color: rgba(255, 255, 255, 0.8); /* Lighter background for better contrast */
+    color: #2b2b2b; /* Darker text color for better visibility */
+    font-size: 1.8vw; /* Slightly smaller font size */
+}
+
+/* EDITOR */
+.slider {
+    width: 40vw; /* Wider slider for a retro look */
+    height: 1.5vh;
+    border-radius: 0.3vw; /* Smaller border-radius */
+    background: #b5886c;
+    outline: none;
+    opacity: 0.9; /* Slightly higher opacity */
+    transition: opacity 0.2s ease; /* Smoother transition */
+    margin-left: auto;
+    cursor: pointer;
+}
+
+.sliderContainer {
+    overflow: hidden;
+    width: 60vw;
+    padding: 2vh;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 0.5vw;
+    display: flex;
+    align-items: center;
+    height: 7vh;
+    color: #2b2b2b;
+    margin: auto;
+}
+
+#playBar {
+    height: 1vw;
+    background-color: #2b2b2b; /* Darker color for playBar */
+}
+
+#playBarContainer {
+    overflow: hidden;
+    border-radius: 0.3vw;
+    margin: auto;
+    width: 80vw;
+    height: 1vw;
+    background-color: #b5886c; /* Match button color for consistency */
+    cursor: pointer;
+}
+
+#panWarningText {
+    font-style: italic;
+    font-size: 1.2vw; /* Slightly larger font size for warning text */
+    text-align: center;
+    margin-top: 2.5vh;
+}
+
