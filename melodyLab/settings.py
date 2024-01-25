@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False       #TURN ON FOR PRODUCTION
 
 
 # Application definition
@@ -45,8 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = False    #TURN ON FOR PRODUCTION
+CSRF_COOKIE_SECURE = False   #TURN ON FOR PRODUCTION
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
