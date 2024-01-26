@@ -205,18 +205,6 @@ document.addEventListener('DOMContentLoaded', function () {
         speedSlider.disabled = true;
         volumeSlider.disabled = true;
 
-        let dots = '';
-        let frameCount = 0;
-        function updateText() {
-            frameCount++;
-            if (frameCount % 60 === 0) { // Update every 60 frames (approximately 1 second)
-                dots = dots.length < 3 ? dots + '.' : '';
-                downloadingConfirmationText.textContent = `Exporting${dots}`;
-            }
-            requestAnimationFrame(updateText);
-        }
-        updateText();
-
         const response = await fetch(audioElement.src);
         const audioData = await response.arrayBuffer();
         const audioBuffer = await audioContext.decodeAudioData(audioData);
