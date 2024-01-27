@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
             playBarContainer.addEventListener('click', function (e) {
                 const percentClicked = e.offsetX / this.clientWidth;
                 const newTime = percentClicked * audioElement.duration;
-        
+                console.log('Time set to:', newTime)
                 audioElement.currentTime = newTime;
             });
         
@@ -132,9 +132,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // PLAY/PAUSE FUNCTIONALITY
         if (playButton.textContent === "Play") {
+            console.log('Playing')
             audioElement.play();
             playButton.textContent = "Pause";
         } else if (playButton.textContent === "Pause") {
+            console.log('Paused')
             audioElement.pause();
             playButton.textContent = "Play";
         }
@@ -144,6 +146,7 @@ document.addEventListener('DOMContentLoaded', function () {
     speedSlider.addEventListener('input', function () {
         updateSliderTextValues();
         const speedValue = parseFloat(speedSlider.value).toFixed(2);
+        console.log('Speed set to:', speedValue)
         audioElement.playbackRate = speedValue;
     });
 
