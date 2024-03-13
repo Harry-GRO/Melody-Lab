@@ -37,12 +37,14 @@ SECURE_SSL_REDIRECT = False       #TURN ON FOR PRODUCTION
 
 INSTALLED_APPS = [
     'app.apps.AppConfig',
+    'users.apps.UsersConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
 ]
 
 SESSION_COOKIE_SECURE = False    #TURN ON FOR PRODUCTION
@@ -129,6 +131,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = os.getenv('MEDIA_URL')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+LOGIN_REDIRECT_URL = '/'
 
 
 # Default primary key field type
