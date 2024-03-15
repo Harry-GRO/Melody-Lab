@@ -10,11 +10,8 @@
     <title>Melody Lab</title>
 </head>
 <body>
-    {# {% if user.is_authenticated %} #}
-    {% block content %}{% endblock %} <!-- INDENT -->
-    {# {% else %} #}
-        <a href="{% url 'login' %}">Login Here</a>
+    {% block content %}{% endblock %}
     <a href="https://harrygroves.me/" class="authorTag">Created by Harry Groves</a>
-    {# {% endif %} #}
+
 </body>
 </html>

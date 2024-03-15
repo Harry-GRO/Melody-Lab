@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.core.files.storage import FileSystemStorage
 import os
 import re
+from django.contrib.auth.decorators import login_required
 
 def delete_file(request):
     if request.method == 'POST':
@@ -20,6 +21,7 @@ def delete_file(request):
 
     return redirect('home')
 
+@login_required
 def home(request):
     if request.method == 'POST':
         form = UploadForm(request.POST, request.FILES)
@@ -40,9 +42,11 @@ def home(request):
 
     return render(request, 'app/home.html', {'form': form})
 
+@login_required
 def about(request):
     return render(request, 'app/about.html')
 
+@login_required
 def editor(request):
     uploaded_file_name = request.session.get('uploaded_file_name', None)
     return render(request, 'app/editor.html', {'data': uploaded_file_name})
