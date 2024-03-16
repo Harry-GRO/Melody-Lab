@@ -1,25 +1,11 @@
 from django.shortcuts import render, redirect
 from .forms import UploadForm
 from django.conf import settings
-from django.http import JsonResponse
 from django.core.files.storage import FileSystemStorage
 import os
 import re
 from django.contrib.auth.decorators import login_required
-
-def delete_file(request):
-    if request.method == 'POST':
-        file_path = request.POST.get('file_path')
-
-        storage = FileSystemStorage()
-
-        if storage.exists(file_path):
-            storage.delete(file_path)
-            return JsonResponse({'status': 'file deleted'})
-        else:
-            return JsonResponse({'status': 'file not found'})
-
-    return redirect('home')
+import glob
 
 @login_required
 def home(request):
@@ -32,6 +18,14 @@ def home(request):
             #REMOVES SPECIAL CHARACTERS
             name, ext = os.path.splitext(myfile.name)
             filename = re.sub('[^0-9a-zA-Z]+', '_', name) + ext
+
+            user_folder = os.path.join(settings.MEDIA_ROOT, str(request.user.id))
+
+            files = glob.glob(user_folder + '/*')
+            for f in files:
+                os.remove(f)
+
+            fs = FileSystemStorage(location=user_folder)
             filename = fs.save(filename, myfile)
 
             request.session['uploaded_file_name'] = filename
@@ -49,4 +43,6 @@ def about(request):
 @login_required
 def editor(request):
     uploaded_file_name = request.session.get('uploaded_file_name', None)
-    return render(request, 'app/editor.html', {'data': uploaded_file_name})
+    user_folder = os.path.join(settings.MEDIA_ROOT, str(request.user.id))
+    user_folder = user_folder + '/'
+    return render(request, 'app/editor.html', {'data': uploaded_file_name, 'user_folder': user_folder})
