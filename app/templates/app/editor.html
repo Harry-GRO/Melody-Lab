@@ -11,21 +11,33 @@
     <!-- SLIDER ELEMENTS -->
     <div class="container" id="allSlidersContainer">
         <div class="sliderContainer">
-            <p class="volumeText">Volume:&nbsp;</p>
+            <div class="tooltip">
+                <span class="question-mark">?</span>
+                <span class="tooltip-text">Controls how loud or quiet the audio is.</span>
+            </div>         
+            <p class="volumeText">&nbsp;Volume:&nbsp;</p>
             <p class="volumeText" id="volumeValue">100</p>
             <p class="volumeText">%</p>
             <input type="range" min="0" max="150" value="100" step="1" class="slider" id="volumeSlider">
         </div>
 
         <div class="sliderContainer">
-            <p class="speedText">Speed:&nbsp;</p>
+            <div class="tooltip">
+                <span class="question-mark">?</span>
+                <span class="tooltip-text">Controls how quickly the audio plays and adjusts the pitch accordingly.</span>
+            </div> 
+            <p class="speedText">&nbsp;Speed:&nbsp;</p>
             <p class="speedText" id="speedValue">1</p>
             <p class="speedText">x</p>
             <input type="range" min="0.5" max="1.5" value="1" step="0.05" class="slider" id="speedSlider">
         </div>
 
         <div class="sliderContainer">
-            <label class="panText" id="autoPanText">(<input type="checkbox" id="autoPanCheckbox">Auto)&nbsp;</label>
+            <div class="tooltip">
+                <span class="question-mark">?</span>
+                <span class="tooltip-text">Controls how strongly the volume plays out of each ear.</span>
+            </div> 
+            <label class="panText" id="autoPanText">&nbsp;(<input type="checkbox" id="autoPanCheckbox">Auto)&nbsp;</label>
             <p class="panText">Pan:&nbsp;</p>
             <p class="panText" id="panValue">0</p>
             <input type="range" min="-1" max="1" value="0" step="0.1" class="slider" id="panSlider">

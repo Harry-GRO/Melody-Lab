@@ -110,7 +110,7 @@ form > p > input {
 }
 
 .sliderContainer {
-    overflow: hidden;
+
     width: 60vw;
     padding: 2vh;
     background-color: rgba(255, 255, 255, 0.8);
@@ -144,3 +144,45 @@ form > p > input {
     margin-top: 2.5vh;
 }
 
+.tooltip {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .tooltip .tooltip-text {
+    visibility: hidden;
+    width: 120px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    right: calc(100% + 10px); /* Adjusted to add a bit of space between icon and tooltip */
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  .tooltip .tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 100%; /* Changed from 'right' to 'left' */
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent transparent #333; /* Adjusted to position triangle correctly */
+  }
+  
+  .tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+  }
+  
+  .question-mark {
+    cursor: pointer;
+    text-decoration: underline;
+  }
