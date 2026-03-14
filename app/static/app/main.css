@@ -7,11 +7,11 @@ body {
     width: 100vw;
     margin: 0;
     padding: 0;
-    background-image: linear-gradient(to bottom right, #2b2b2b, #704f8c); /* Retro color scheme */
+    background-image: linear-gradient(to bottom right, #2b2b2b, #704f8c);
     background-repeat: no-repeat;
     background-attachment: fixed;
-    font-family: 'Courier New', monospace; /* Retro font */
-    color: #f5f5f5; /* Off-white text color for readability */
+    font-family: 'Courier New', monospace;
+    color: #f5f5f5;
 }
 
 .container {

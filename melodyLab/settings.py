@@ -36,6 +36,7 @@ SECURE_SSL_REDIRECT = False       #TURN ON FOR PRODUCTION
 # Application definition
 
 INSTALLED_APPS = [
+    'django_extensions',
     'app.apps.AppConfig',
     'users.apps.UsersConfig',
     'django.contrib.admin',
