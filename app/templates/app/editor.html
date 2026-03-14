@@ -50,7 +50,7 @@
         <div id="playBar"></div>
     </div>
 
-    <audio src="{% get_media_prefix %}{{ user_folder }}{{ data }}" id="audioPlayer"></audio>
+    <audio src="{{ user_folder }}{{ data }}" id="audioPlayer"></audio>
     <div class="container">
         <button class="button" id="downloadButton" disabled>Export</button>
         <p id="panWarningText">Note: panning features only available in browser.</p>

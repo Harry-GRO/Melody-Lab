@@ -43,6 +43,5 @@ def about(request):
 @login_required
 def editor(request):
     uploaded_file_name = request.session.get('uploaded_file_name', None)
-    user_folder = os.path.join(settings.MEDIA_ROOT, str(request.user.id))
-    user_folder = user_folder + '/'
+    user_folder = settings.MEDIA_URL + str(request.user.id) + '/'
     return render(request, 'app/editor.html', {'data': uploaded_file_name, 'user_folder': user_folder})
