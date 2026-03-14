@@ -1,6 +1,6 @@
 # MelodyLab 🎵
 
-A browser-based audio editor that allows users to upload, manipulate, and export audio files — all without leaving the web.
+A browser-based audio editor that allows users to upload, manipulate, and export audio files.
 
 ---
 
