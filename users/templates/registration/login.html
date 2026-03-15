@@ -1,10 +1,15 @@
 {% extends "app/base.html" %}
 
 {% block content %}
-    <form method="post">
-        {% csrf_token %}
-        {{form}}
-        <button type="submit">Login</button>
-        <p>Don't have an account? <a href="{% url 'register' %}" style="color: white;">Register</a></p>
-    </form>
+    <div class="container">
+        <div class="form-card">
+            <h2>Log In</h2>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="button form-submit">Log In</button>
+            </form>
+            <p>Don't have an account? <a href="{% url 'register' %}">Register</a></p>
+        </div>
+    </div>
 {% endblock %}

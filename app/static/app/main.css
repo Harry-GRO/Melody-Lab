@@ -1,12 +1,12 @@
-/* GENERAL */
+/* ─────────────────────────────────────────
+   GENERAL
+───────────────────────────────────────── */
 body {
-    overflow: hidden;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    width: 100vw;
+    overflow-y: auto;
     margin: 0;
     padding: 0;
+    width: 100vw;
+    min-height: 100vh;
     background-image: linear-gradient(to bottom right, #2b2b2b, #704f8c);
     background-repeat: no-repeat;
     background-attachment: fixed;
@@ -16,173 +16,426 @@ body {
 
 .container {
     box-sizing: border-box;
-    margin: 0;
-    text-align: center;
-    overflow: hidden;
     width: 100vw;
-    padding: 3vh;
-    display: flex;
-    flex-direction: column; /* Stack elements vertically for a retro look */
-    align-items: center;
-    gap: 2vh;
-}
-
-.title {
-    font-size: 4vw; /* Slightly smaller font size for the title */
-    text-align: center;
-    margin-top: 2vh; /* Reduced margin-top */
-}
-
-.subtitle {
-    font-size: 2.5vw; /* Slightly smaller font size for the subtitle */
-    text-align: center;
-    margin-top: 1.5vh; /* Reduced margin-top */
-}
-
-.button {
-    overflow: hidden;
-    font-size: 2vw;
-    background-color: #b5886c; /* Warm, muted button color */
-    color: #fff;
-    padding: 1vh 2vw; /* Increased padding for a button-like feel */
-    border: none;
-    border-radius: 0.5vw;
-    cursor: pointer;
-}
-
-.button:hover {
-    background-color: #8d6d57; /* Darker color on hover for contrast */
-}
-
-.button:disabled {
-    display: none;
-}
-
-.authorTag {
-    color: white;
-    text-decoration: none;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    font-size: 17px;
-}
-
-/* HOME */
-
-#id_file_field {
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    margin: auto;
-}
-
-form {
+    padding: 2vh 3vw;
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 1.5vh;
 }
 
-form > p > label {
-    display: none;
+.title {
+    font-size: 4vw;
+    text-align: center;
+    margin: 2vh 0 0;
 }
 
-form > p > input {
-    padding: 1.5vw; /* Increased input padding */
-    width: 30vw;
-    height: 5vh;
+.subtitle {
+    font-size: 2vw;
+    text-align: center;
+    margin: 0.5vh 0 0;
+    opacity: 0.8;
+}
+
+/* ─────────────────────────────────────────
+   BUTTONS
+───────────────────────────────────────── */
+.button {
+    font-size: 1.4vw;
+    font-family: 'Courier New', monospace;
+    background-color: #b5886c;
+    color: #fff;
+    padding: 0.8vh 1.8vw;
+    border: none;
     border-radius: 0.5vw;
-    background-color: rgba(255, 255, 255, 0.8); /* Lighter background for better contrast */
-    color: #2b2b2b; /* Darker text color for better visibility */
-    font-size: 1.8vw; /* Slightly smaller font size */
-}
-
-/* EDITOR */
-.slider {
-    width: 40vw; /* Wider slider for a retro look */
-    height: 1.5vh;
-    border-radius: 0.3vw; /* Smaller border-radius */
-    background: #b5886c;
-    outline: none;
-    opacity: 0.9; /* Slightly higher opacity */
-    transition: opacity 0.2s ease; /* Smoother transition */
-    margin-left: auto;
     cursor: pointer;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
 }
 
-.sliderContainer {
+.button:hover {
+    background-color: #8d6d57;
+}
 
-    width: 60vw;
-    padding: 2vh;
-    background-color: rgba(255, 255, 255, 0.8);
+.button:disabled {
+    opacity: 0.35;
+    pointer-events: none;
+    display: inline-block;
+}
+
+.button-ghost {
+    font-size: 1.2vw;
+    font-family: 'Courier New', monospace;
+    background-color: transparent;
+    color: #f5f5f5;
+    padding: 0.6vh 1.5vw;
+    border: 1px solid rgba(245, 245, 245, 0.3);
     border-radius: 0.5vw;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    white-space: nowrap;
+}
+
+.button-ghost:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(245, 245, 245, 0.6);
+}
+
+/* ─────────────────────────────────────────
+   NAV BAR
+───────────────────────────────────────── */
+.navbar {
+    width: 100%;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
-    height: 7vh;
-    color: #2b2b2b;
-    margin: auto;
+    justify-content: space-between;
+    padding: 1.2vh 3vw;
+    background-color: rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-#playBar {
-    height: 1vw;
-    background-color: #2b2b2b; /* Darker color for playBar */
+.navbar-brand {
+    font-size: 1.6vw;
+    font-weight: bold;
+    color: #f5f5f5;
+    text-decoration: none;
+    letter-spacing: 0.05em;
 }
 
-#playBarContainer {
-    overflow: hidden;
-    border-radius: 0.3vw;
-    margin: auto;
-    width: 80vw;
-    height: 1vw;
-    background-color: #b5886c; /* Match button color for consistency */
+.navbar-brand span {
+    color: #b5886c;
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5vw;
+}
+
+.nav-link {
+    font-size: 1.2vw;
+    color: rgba(245, 245, 245, 0.7);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+    color: #f5f5f5;
+}
+
+/* ─────────────────────────────────────────
+   FORMS
+───────────────────────────────────────── */
+.form-card {
+    background-color: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0.8vw;
+    padding: 3vh 3vw;
+    width: 32vw;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vh;
+}
+
+.form-card h2 {
+    margin: 0 0 1vh;
+    font-size: 2vw;
+    text-align: center;
+}
+
+.form-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2vh;
+}
+
+.form-card p {
+    margin: 0;
+    font-size: 1.2vw;
+    text-align: center;
+    opacity: 0.7;
+}
+
+.form-card a {
+    color: #b5886c;
+    text-decoration: none;
+}
+
+.form-card a:hover {
+    text-decoration: underline;
+}
+
+.form-card form p {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4vh;
+    text-align: left;
+    opacity: 1;
+}
+
+.form-card form p label {
+    font-size: 1.1vw;
+    opacity: 0.8;
+    display: block;
+}
+
+.form-card form p input,
+.form-card form p select,
+.form-card form ul {
+    padding: 0.8vh 1vw;
+    border-radius: 0.4vw;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #f5f5f5;
+    font-family: 'Courier New', monospace;
+    font-size: 1.1vw;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-card form p input:focus {
+    outline: none;
+    border-color: #b5886c;
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.form-card form ul {
+    background: rgba(200, 80, 80, 0.15);
+    border-color: rgba(200, 80, 80, 0.4);
+    padding: 0.8vh 1.5vw;
+    list-style: disc;
+    font-size: 1vw;
+    color: #f5a5a5;
+}
+
+.form-card .form-submit {
+    margin-top: 0.5vh;
+    align-self: center;
+}
+
+#id_file_field {
+    color: #f5f5f5;
+    font-size: 1.2vw;
     cursor: pointer;
+}
+
+/* ─────────────────────────────────────────
+   EDITOR — TWO PANEL LAYOUT
+───────────────────────────────────────── */
+#editorLayout {
+    display: grid;
+    grid-template-columns: 1fr 26vw;
+    grid-template-rows: calc(100vh - 6vh);  /* full height minus navbar */
+    gap: 0;
+    height: calc(100vh - 6vh);
+    overflow: hidden;
+}
+
+/* LEFT: main area */
+#editorMain {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5vh;
+    padding: 2.5vh 2.5vw;
+    overflow: hidden;
+}
+
+#transportBar {
+    display: flex;
+    align-items: center;
+    gap: 1vw;
+}
+
+#waveformWrapper {
+    position: relative;
+    flex: 1;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.6vw;
+    cursor: pointer;
+    overflow: hidden;
+    min-height: 12vh;
+}
+
+#waveformCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+#waveformLoadingText {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.1vw;
+    color: rgba(245, 245, 245, 0.3);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+#trimBar {
+    display: flex;
+    align-items: center;
+    gap: 1.5vw;
 }
 
 #panWarningText {
     font-style: italic;
-    font-size: 1.2vw; /* Slightly larger font size for warning text */
-    text-align: center;
-    margin-top: 2.5vh;
+    font-size: 1vw;
+    opacity: 0.45;
+    margin: 0;
 }
 
-.tooltip {
-    position: relative;
-    display: inline-block;
-  }
-  
-  .tooltip .tooltip-text {
-    visibility: hidden;
-    width: 120px;
-    background-color: #333;
-    color: #fff;
+#downloadingConfirmationText {
+    font-size: 1.2vw;
+    color: #b5886c;
     text-align: center;
-    border-radius: 6px;
-    padding: 5px;
-    position: absolute;
-    z-index: 1;
-    top: 50%;
-    right: calc(100% + 10px); /* Adjusted to add a bit of space between icon and tooltip */
-    transform: translateY(-50%);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  
-  .tooltip .tooltip-text::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 100%; /* Changed from 'right' to 'left' */
-    margin-top: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: transparent transparent transparent #333; /* Adjusted to position triangle correctly */
-  }
-  
-  .tooltip:hover .tooltip-text {
-    visibility: visible;
-    opacity: 1;
-  }
-  
-  .question-mark {
+}
+
+/* RIGHT: sidebar */
+#editorSidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8vh;
+    padding: 2vh 1.5vw;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.sidebar-heading {
+    font-size: 0.85vw;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #b5886c;
+    margin: 0.5vh 0 0.2vh;
+}
+
+.sidebar-divider {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin: 0.8vh 0;
+}
+
+/* CONTROL ROWS */
+.controlRow {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4vh;
+}
+
+.controlLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.5vw;
+    font-size: 1.1vw;
+}
+
+.controlValue {
+    font-size: 1vw;
+    color: #b5886c;
+    margin-left: auto;
+}
+
+.autoLabel {
+    font-size: 0.9vw;
+    opacity: 0.65;
+    display: flex;
+    align-items: center;
+    gap: 0.3vw;
     cursor: pointer;
-    text-decoration: underline;
-  }
+}
+
+/* SLIDER */
+.slider {
+    width: 100%;
+    height: 0.4vh;
+    border-radius: 0.3vw;
+    background: rgba(255, 255, 255, 0.15);
+    accent-color: #b5886c;
+    outline: none;
+    cursor: pointer;
+}
+
+/* FX BLOCKS */
+.fxBlock {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 0.4vw;
+    padding: 0.8vh 0.8vw;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6vh;
+}
+
+.fxTitle {
+    font-size: 1.1vw;
+    color: #f5f5f5;
+    display: flex;
+    align-items: center;
+    gap: 0.5vw;
+    cursor: pointer;
+    padding-bottom: 0.4vh;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.fxTitle input[type="checkbox"] {
+    cursor: pointer;
+    accent-color: #b5886c;
+}
+
+/* ─────────────────────────────────────────
+   KEYBOARD SHORTCUTS LEGEND
+───────────────────────────────────────── */
+#shortcutsLegend {
+    position: fixed;
+    bottom: 1.5vh;
+    right: 1.5vw;
+    background-color: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 0.5vw;
+    padding: 1vh 1.2vw;
+    font-size: 0.9vw;
+    color: rgba(245, 245, 245, 0.55);
+    line-height: 1.9;
+    pointer-events: none;
+}
+
+#shortcutsLegend .shortcutTitle {
+    font-size: 0.8vw;
+    color: #b5886c;
+    margin: 0 0 0.4vh 0;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+#shortcutsLegend p { margin: 0; }
+
+kbd {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    padding: 0 0.35vw;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85vw;
+}
+
+/* ─────────────────────────────────────────
+   AUTHOR TAG
+───────────────────────────────────────── */
+.authorTag {
+    display: block;
+    text-align: center;
+    color: rgba(245, 245, 245, 0.3);
+    text-decoration: none;
+    font-size: 1vw;
+    padding: 2vh 0;
+}
+
+.authorTag:hover {
+    color: rgba(245, 245, 245, 0.55);
+}

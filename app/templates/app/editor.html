@@ -1,71 +1,169 @@
 {% extends 'app/base.html' %}
 {% load static %}
 {% block content %}
-    <h1 class="title">Editor</h1>
 
-    <div class="container">
-        <button class="button" id="differentFileButton" onclick="redirectHome();">Choose a different file</button>
-        <button class="button" id="playPauseButton">Play</button>
+<div id="editorLayout">
+
+    <!-- ── LEFT PANEL: waveform + transport ── -->
+    <div id="editorMain">
+
+        <div id="transportBar">
+            <button class="button" id="differentFileButton" onclick="redirectHome();">← Back</button>
+            <button class="button" id="playPauseButton">▶ Play</button>
+            <button class="button" id="downloadButton" disabled>↓ Export</button>
+        </div>
+
+        <div id="waveformWrapper">
+            <canvas id="waveformCanvas"></canvas>
+            <p id="waveformLoadingText">Press Play to load waveform</p>
+        </div>
+
+        <div id="trimBar">
+            <button class="button-ghost" id="resetTrimButton">Reset Trim</button>
+            <span id="panWarningText">Panning only available in browser</span>
+        </div>
+
+        <p id="downloadingConfirmationText" style="display:none;">Exporting... (may take a while)</p>
+
     </div>
 
-    <!-- SLIDER ELEMENTS -->
-    <div class="container" id="allSlidersContainer">
-        <div class="sliderContainer">
-            <div class="tooltip">
-                <span class="question-mark">?</span>
-                <span class="tooltip-text">Controls how loud or quiet the audio is.</span>
-            </div>         
-            <p class="volumeText">&nbsp;Volume:&nbsp;</p>
-            <p class="volumeText" id="volumeValue">100</p>
-            <p class="volumeText">%</p>
+    <!-- ── RIGHT PANEL: controls sidebar ── -->
+    <div id="editorSidebar">
+
+        <p class="sidebar-heading">Controls</p>
+
+        <!-- Volume -->
+        <div class="controlRow">
+            <div class="controlLabel">
+                <span>Volume</span>
+                <span class="controlValue" id="volumeValue">100%</span>
+            </div>
             <input type="range" min="0" max="150" value="100" step="1" class="slider" id="volumeSlider">
         </div>
 
-        <div class="sliderContainer">
-            <div class="tooltip">
-                <span class="question-mark">?</span>
-                <span class="tooltip-text">Controls how quickly the audio plays and adjusts the pitch accordingly.</span>
-            </div> 
-            <p class="speedText">&nbsp;Speed:&nbsp;</p>
-            <p class="speedText" id="speedValue">1</p>
-            <p class="speedText">x</p>
+        <!-- Speed -->
+        <div class="controlRow">
+            <div class="controlLabel">
+                <span>Speed</span>
+                <span class="controlValue" id="speedValue">1x</span>
+            </div>
             <input type="range" min="0.5" max="1.5" value="1" step="0.05" class="slider" id="speedSlider">
         </div>
 
-        <div class="sliderContainer">
-            <div class="tooltip">
-                <span class="question-mark">?</span>
-                <span class="tooltip-text">Controls how strongly the volume plays out of each ear.</span>
-            </div> 
-            <label class="panText" id="autoPanText">&nbsp;(<input type="checkbox" id="autoPanCheckbox">Auto)&nbsp;</label>
-            <p class="panText">Pan:&nbsp;</p>
-            <p class="panText" id="panValue">0</p>
+        <!-- Pan -->
+        <div class="controlRow">
+            <div class="controlLabel">
+                <span>Panning</span>
+                <span class="controlValue" id="panValue">0</span>
+                <label class="autoLabel"><input type="checkbox" id="autoPanCheckbox"> Auto</label>
+            </div>
             <input type="range" min="-1" max="1" value="0" step="0.1" class="slider" id="panSlider">
         </div>
+
+        <div class="sidebar-divider"></div>
+        <p class="sidebar-heading">Equaliser</p>
+
+        <!-- Bass -->
+        <div class="controlRow">
+            <div class="controlLabel">
+                <span>Bass</span>
+                <span class="controlValue" id="bassValue">0dB</span>
+            </div>
+            <input type="range" min="-12" max="12" value="0" step="1" class="slider" id="bassSlider">
+        </div>
+
+        <!-- Mid -->
+        <div class="controlRow">
+            <div class="controlLabel">
+                <span>Mid</span>
+                <span class="controlValue" id="midValue">0dB</span>
+            </div>
+            <input type="range" min="-12" max="12" value="0" step="1" class="slider" id="midSlider">
+        </div>
+
+        <!-- Treble -->
+        <div class="controlRow">
+            <div class="controlLabel">
+                <span>Treble</span>
+                <span class="controlValue" id="trebleValue">0dB</span>
+            </div>
+            <input type="range" min="-12" max="12" value="0" step="1" class="slider" id="trebleSlider">
+        </div>
+
+        <div class="sidebar-divider"></div>
+        <p class="sidebar-heading">Effects</p>
+
+        <!-- Reverb -->
+        <div class="fxBlock">
+            <label class="fxTitle"><input type="checkbox" id="reverbToggle"> Reverb</label>
+            <div class="controlRow">
+                <div class="controlLabel">
+                    <span>Mix</span>
+                    <span class="controlValue" id="reverbMixValue">30%</span>
+                </div>
+                <input type="range" min="0" max="100" value="30" step="1" class="slider" id="reverbMixSlider">
+            </div>
+            <div class="controlRow">
+                <div class="controlLabel">
+                    <span>Decay</span>
+                    <span class="controlValue" id="reverbDecayValue">2s</span>
+                </div>
+                <input type="range" min="0.5" max="6" value="2" step="0.5" class="slider" id="reverbDecaySlider">
+            </div>
+        </div>
+
+        <!-- Delay -->
+        <div class="fxBlock">
+            <label class="fxTitle"><input type="checkbox" id="delayToggle"> Delay</label>
+            <div class="controlRow">
+                <div class="controlLabel">
+                    <span>Time</span>
+                    <span class="controlValue" id="delayTimeValue">0.3s</span>
+                </div>
+                <input type="range" min="0.05" max="1" value="0.3" step="0.05" class="slider" id="delayTimeSlider">
+            </div>
+            <div class="controlRow">
+                <div class="controlLabel">
+                    <span>Feedback</span>
+                    <span class="controlValue" id="delayFeedbackValue">30%</span>
+                </div>
+                <input type="range" min="0" max="0.9" value="0.3" step="0.05" class="slider" id="delayFeedbackSlider">
+            </div>
+        </div>
+
+        <!-- Distortion -->
+        <div class="fxBlock">
+            <label class="fxTitle"><input type="checkbox" id="distortionToggle"> Distortion</label>
+            <div class="controlRow">
+                <div class="controlLabel">
+                    <span>Amount</span>
+                    <span class="controlValue" id="distortionAmountValue">50</span>
+                </div>
+                <input type="range" min="0" max="400" value="50" step="10" class="slider" id="distortionAmountSlider">
+            </div>
+        </div>
+
     </div>
+</div>
 
-    <a href="{% url 'logout' %}" style="color: white;">Log Out</a>
-    
-    <div id="playBarContainer">
-        <div id="playBar"></div>
-    </div>
+<!-- KEYBOARD SHORTCUTS LEGEND -->
+<div id="shortcutsLegend">
+    <p class="shortcutTitle">Shortcuts</p>
+    <p><kbd>Space</kbd> Play / Pause</p>
+    <p><kbd>←</kbd> <kbd>→</kbd> Seek 5s</p>
+    <p><kbd>↑</kbd> <kbd>↓</kbd> Volume</p>
+    <p><kbd>M</kbd> Mute</p>
+    <p><kbd>R</kbd> Reset trim</p>
+</div>
 
-    <audio src="{{ user_folder }}{{ data }}" id="audioPlayer"></audio>
-    <div class="container">
-        <button class="button" id="downloadButton" disabled>Export</button>
-        <p id="panWarningText">Note: panning features only available in browser.</p>
-        <p id="downloadingConfirmationText" style="display: none;">Exporting... (may take a while)</p>
-    </div>
+<audio src="{{ user_folder }}{{ data }}" id="audioPlayer"></audio>
+<div id="dataSend" fileName="{{ data }}" style="display:none;"></div>
+<button id="homeRedirectButton" style="display:none;" onclick="redirectHome();"></button>
 
-    <div id="dataSend" fileName="{{ data }}" style="display: none;"></div>
-
-    <button id="homeRedirectButton" style="display:none;" onclick="redirectHome();"></button>
-    <script>
-        function redirectHome() {
-            window.location.href = "{% url 'home' %}";
-        }
-    </script>
-
-    <script src="{% static 'app/editor.js' %}"></script>
+<script>
+    function redirectHome() {
+        window.location.href = "{% url 'home' %}";
+    }
+</script>
+<script src="{% static 'app/editor.js' %}"></script>
 {% endblock content %}
-

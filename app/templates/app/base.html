@@ -4,13 +4,30 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
     <link rel="stylesheet" type="text/css" href="{% static 'app/main.css' %}">
     <link rel="icon" type="image/png" href="{% static 'app/images/logo.png' %}">
     <title>Melody Lab</title>
 </head>
 <body>
+
+    <nav class="navbar">
+        <a href="{% url 'home' %}" class="navbar-brand">Melody<span>Lab</span></a>
+        <div class="navbar-right">
+            {% if user.is_authenticated %}
+                <span class="nav-link">{{ user.username }}</span>
+                <form method="post" action="{% url 'logout' %}" style="margin:0;">
+                    {% csrf_token %}
+                    <button type="submit" class="button-ghost">Log Out</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="nav-link">Log In</a>
+                <a href="{% url 'register' %}" class="button-ghost">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+
     {% block content %}{% endblock %}
+
     <a href="https://harrygroves.me/" class="authorTag">Created by Harry Groves</a>
 
 </body>
