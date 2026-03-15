@@ -1,6 +1,6 @@
 # MelodyLab 🎵
 
-A browser-based audio editor that allows users to upload, manipulate, and export audio files.
+A browser-based audio editor that allows users to upload, manipulate, and export audio files — all without leaving the web.
 
 ---
 
@@ -8,8 +8,9 @@ A browser-based audio editor that allows users to upload, manipulate, and export
 
 ### Audio Playback & Controls
 - Upload audio files directly from your device (supports MP3, OGG, FLAC, WebM and more)
-- Play/pause controls with a real-time progress bar
-- Seek to any point in the track by clicking the progress bar
+- Play/pause with real-time waveform visualiser
+- Click anywhere on the waveform to seek to that position
+- Keyboard shortcuts for all core actions
 
 ### Audio Manipulation
 - **Volume** — Adjust playback volume from 0% to 150%
@@ -17,8 +18,30 @@ A browser-based audio editor that allows users to upload, manipulate, and export
 - **Stereo Panning** — Manually control left/right audio balance, or enable auto-pan mode
 - All controls update in real time via the Web Audio API
 
-### Export
-- Export your edited audio directly from the browser
+### Trim & Export
+- Drag the trim handles on the waveform to select a region
+- Playback loops within the trim region
+- Export bakes in your trim, volume, speed, EQ and effects settings
+- Exported files are downloaded as `.wav`
+
+### Equaliser
+- **Bass** — Low shelf filter at 200Hz (±12dB)
+- **Mid** — Peaking filter at 1kHz (±12dB)
+- **Treble** — High shelf filter at 4kHz (±12dB)
+
+### Effects
+- **Reverb** — Adjustable mix and decay time
+- **Delay** — Adjustable time and feedback
+- **Distortion** — Adjustable drive amount
+
+### Keyboard Shortcuts
+| Key | Action |
+|-----|--------|
+| `Space` | Play / Pause |
+| `←` / `→` | Seek 5 seconds |
+| `↑` / `↓` | Volume up / down |
+| `M` | Mute |
+| `R` | Reset trim |
 
 ### User Accounts
 - Secure registration and login system
