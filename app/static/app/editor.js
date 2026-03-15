@@ -1,27 +1,77 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // WEB AUDIO API ELEMENTS
-    let AudioContext;
-    let audioContext;
-    let track;
-    let pannerOptions;
-    let panner;
-    let gainNode;
-    // EQ NODES
-    let bassFilter, midFilter, trebleFilter;
 
-    // EFFECTS NODES
+    // ─────────────────────────────────────────
+    // AUDIO NODES
+    // ─────────────────────────────────────────
+    let audioContext, track, panner, gainNode;
+    let bassFilter, midFilter, trebleFilter;
     let reverbNode, reverbWetGain, reverbDryGain;
     let delayNode, delayFeedbackGain, delayWetGain, delayDryGain;
     let distortionNode, distortionWetGain, distortionDryGain;
 
-    const audioElement = document.getElementById('audioPlayer');
     let isContextInitialized = false;
     let currentlyDownloading = false;
+    let slidersInitialized = false;
+    let autoPanInterval;
+    let cachedArrayBuffer = null;
 
-    // WAVEFORM ELEMENTS
-    const waveformCanvas = document.getElementById('waveformCanvas');
-    const waveformCtx = waveformCanvas.getContext('2d');
-    const waveformWrapper = document.getElementById('waveformWrapper');
+    // ─────────────────────────────────────────
+    // DOM ELEMENTS
+    // ─────────────────────────────────────────
+    const audioElement       = document.getElementById('audioPlayer');
+    const playButton         = document.getElementById('playPauseButton');
+    const downloadButton     = document.getElementById('downloadButton');
+    const differentFileButton = document.getElementById('differentFileButton');
+    const homeRedirectButton = document.getElementById('homeRedirectButton');
+    const resetTrimButton    = document.getElementById('resetTrimButton');
+    const resetAllButton     = document.getElementById('resetAllButton');
+
+    const dataSend           = document.getElementById('dataSend');
+    const fileName           = dataSend.getAttribute('fileName');
+    const fileNameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'));
+
+    const downloadingConfirmationText = document.getElementById('downloadingConfirmationText');
+    downloadingConfirmationText.style.display = 'none';
+    downloadButton.disabled = true;
+
+    // Sliders
+    const inputEvent      = new Event('input');
+    const volumeSlider    = document.getElementById('volumeSlider');
+    const volumeSliderValue = document.getElementById('volumeValue');
+    const speedSlider     = document.getElementById('speedSlider');
+    const speedSliderValue = document.getElementById('speedValue');
+    const panSlider       = document.getElementById('panSlider');
+    const panSliderValue  = document.getElementById('panValue');
+    const autoPanCheckbox = document.getElementById('autoPanCheckbox');
+    autoPanCheckbox.checked = false;
+
+    // EQ
+    const bassSlider  = document.getElementById('bassSlider');
+    const bassValue   = document.getElementById('bassValue');
+    const midSlider   = document.getElementById('midSlider');
+    const midValue    = document.getElementById('midValue');
+    const trebleSlider = document.getElementById('trebleSlider');
+    const trebleValue  = document.getElementById('trebleValue');
+
+    // Effects
+    const reverbToggle       = document.getElementById('reverbToggle');
+    const reverbMixSlider    = document.getElementById('reverbMixSlider');
+    const reverbMixValue     = document.getElementById('reverbMixValue');
+    const reverbDecaySlider  = document.getElementById('reverbDecaySlider');
+    const reverbDecayValue   = document.getElementById('reverbDecayValue');
+    const delayToggle        = document.getElementById('delayToggle');
+    const delayTimeSlider    = document.getElementById('delayTimeSlider');
+    const delayTimeValue     = document.getElementById('delayTimeValue');
+    const delayFeedbackSlider = document.getElementById('delayFeedbackSlider');
+    const delayFeedbackValue  = document.getElementById('delayFeedbackValue');
+    const distortionToggle       = document.getElementById('distortionToggle');
+    const distortionAmountSlider = document.getElementById('distortionAmountSlider');
+    const distortionAmountValue  = document.getElementById('distortionAmountValue');
+
+    // Waveform
+    const waveformCanvas      = document.getElementById('waveformCanvas');
+    const waveformCtx         = waveformCanvas.getContext('2d');
+    const waveformWrapper     = document.getElementById('waveformWrapper');
     const waveformLoadingText = document.getElementById('waveformLoadingText');
     let waveformData = null;
     let animationFrameId = null;
@@ -34,73 +84,21 @@ document.addEventListener('DOMContentLoaded', function () {
     let dragging = null;
     const HANDLE_HIT = 10;
 
-    const resetTrimButton = document.getElementById('resetTrimButton');
-
-    // GET FILENAME ELEMENTS
-    const dataSend = document.getElementById('dataSend');
-    const fileName = dataSend.getAttribute('fileName');
-    var dotIndex = fileName.lastIndexOf('.');
-    const fileNameWithoutExtension = fileName.substring(0, dotIndex);
-
-    // INPUT ELEMENTS
-    const homeRedirectButton = document.getElementById('homeRedirectButton');
-    const playButton = document.getElementById('playPauseButton');
-    const differentFileButton = document.getElementById('differentFileButton');
-    const downloadButton = document.getElementById('downloadButton');
-    downloadButton.disabled = true;
-    const autoPanCheckbox = document.getElementById('autoPanCheckbox');
-    autoPanCheckbox.checked = false;
-
-    // SLIDER ELEMENTS
-    let slidersInitialized = false;
-    const inputEvent = new Event('input');
-    const volumeSlider = document.getElementById('volumeSlider');
-    const volumeSliderValue = document.getElementById('volumeValue');
-    const speedSliderValue = document.getElementById('speedValue');
-    const panSliderValue = document.getElementById('panValue');
-    const speedSlider = document.getElementById('speedSlider');
-    const panSlider = document.getElementById('panSlider');
-
-    // EQ SLIDER ELEMENTS
-    const bassSlider = document.getElementById('bassSlider');
-    const midSlider = document.getElementById('midSlider');
-    const trebleSlider = document.getElementById('trebleSlider');
-    const bassValue = document.getElementById('bassValue');
-    const midValue = document.getElementById('midValue');
-    const trebleValue = document.getElementById('trebleValue');
-
-    // EFFECTS ELEMENTS
-    const reverbToggle = document.getElementById('reverbToggle');
-    const reverbMixSlider = document.getElementById('reverbMixSlider');
-    const reverbDecaySlider = document.getElementById('reverbDecaySlider');
-    const reverbMixValue = document.getElementById('reverbMixValue');
-    const reverbDecayValue = document.getElementById('reverbDecayValue');
-    const delayToggle = document.getElementById('delayToggle');
-    const delayTimeSlider = document.getElementById('delayTimeSlider');
-    const delayFeedbackSlider = document.getElementById('delayFeedbackSlider');
-    const delayTimeValue = document.getElementById('delayTimeValue');
-    const delayFeedbackValue = document.getElementById('delayFeedbackValue');
-    const distortionToggle = document.getElementById('distortionToggle');
-    const distortionAmountSlider = document.getElementById('distortionAmountSlider');
-    const distortionAmountValue = document.getElementById('distortionAmountValue');
-
-
-    // TEXT ELEMENTS
-    const panWarningText = document.getElementById('panWarningText');
-    downloadingConfirmationText = document.getElementById('downloadingConfirmationText');
-    downloadingConfirmationText.style.display = 'none';
-
     // ─────────────────────────────────────────
-    // WAVEFORM: DECODE AUDIO AND BUILD DATA
+    // WAVEFORM: LOAD & DECODE
     // ─────────────────────────────────────────
     async function loadWaveform() {
         try {
-            const response = await fetch(audioElement.src);
-            const arrayBuffer = await response.arrayBuffer();
-            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            waveformLoadingText.style.display = 'block';
+            waveformLoadingText.textContent = 'Loading waveform...';
+            if (!cachedArrayBuffer) {
+                const response = await fetch(audioElement.src);
+                cachedArrayBuffer = await response.arrayBuffer();
+            }
+            const audioBuffer = await audioContext.decodeAudioData(cachedArrayBuffer.slice(0));
 
             const rawData = audioBuffer.getChannelData(0);
-            const samples = waveformCanvas.width;
+            const samples = Math.min(waveformCanvas.width, 800);
             const blockSize = Math.floor(rawData.length / samples);
             const dataPoints = [];
 
@@ -114,7 +112,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const max = Math.max(...dataPoints);
             waveformData = dataPoints.map(v => v / max);
-
             waveformLoadingText.style.display = 'none';
             drawWaveform(0);
         } catch (e) {
@@ -123,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ─────────────────────────────────────────
-    // WAVEFORM: DRAW WITH TRIM REGION + PLAYHEAD
+    // WAVEFORM: DRAW
     // ─────────────────────────────────────────
     function drawWaveform(progress) {
         if (!waveformData) return;
@@ -137,42 +134,36 @@ document.addEventListener('DOMContentLoaded', function () {
 
         waveformCtx.clearRect(0, 0, W, H);
 
+        // Dimmed regions outside trim
         waveformCtx.fillStyle = 'rgba(0,0,0,0.45)';
         waveformCtx.fillRect(0, 0, startX, H);
         waveformCtx.fillRect(endX, 0, W - endX, H);
 
+        // Trim region highlight
         waveformCtx.fillStyle = 'rgba(181,136,108,0.12)';
         waveformCtx.fillRect(startX, 0, endX - startX, H);
 
+        // Waveform bars
+        const barWidth = W / waveformData.length;
         for (let i = 0; i < waveformData.length; i++) {
-            const x = i;
+            const x = i * barWidth;
             const amplitude = waveformData[i] * mid * 0.9;
             const inTrim = x >= startX && x <= endX;
             const played = x < playedX;
-
-            if (!inTrim) {
-                waveformCtx.fillStyle = 'rgba(245,245,245,0.12)';
-            } else if (played) {
-                waveformCtx.fillStyle = '#f5f5f5';
-            } else {
-                waveformCtx.fillStyle = 'rgba(245,245,245,0.4)';
-            }
-
-            waveformCtx.fillRect(x, mid - amplitude, 1, amplitude * 2);
+            waveformCtx.fillStyle = !inTrim ? 'rgba(245,245,245,0.12)' : played ? '#f5f5f5' : 'rgba(245,245,245,0.4)';
+            waveformCtx.fillRect(x, mid - amplitude, barWidth, amplitude * 2);
         }
 
+        // Trim handle lines
         waveformCtx.fillStyle = '#b5886c';
         waveformCtx.fillRect(startX - 1, 0, 2, H);
         waveformCtx.fillRect(endX - 1, 0, 2, H);
 
-        waveformCtx.fillStyle = '#b5886c';
-        waveformCtx.beginPath();
-        waveformCtx.roundRect(startX - 5, 0, 10, 18, 3);
-        waveformCtx.fill();
-        waveformCtx.beginPath();
-        waveformCtx.roundRect(endX - 5, 0, 10, 18, 3);
-        waveformCtx.fill();
+        // Trim handle grips
+        waveformCtx.beginPath(); waveformCtx.roundRect(startX - 5, 0, 10, 18, 3); waveformCtx.fill();
+        waveformCtx.beginPath(); waveformCtx.roundRect(endX - 5, 0, 10, 18, 3); waveformCtx.fill();
 
+        // Playhead
         waveformCtx.fillStyle = '#ffffff';
         waveformCtx.fillRect(playedX - 1, 0, 2, H);
     }
@@ -185,14 +176,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const progress = audioElement.currentTime / audioElement.duration || 0;
 
             if (audioElement.duration) {
-                const trimStartTime = trimStart * audioElement.duration;
-                const trimEndTime = trimEnd * audioElement.duration;
-                if (audioElement.currentTime < trimStartTime) {
-                    audioElement.currentTime = trimStartTime;
-                }
-                if (audioElement.currentTime >= trimEndTime) {
-                    audioElement.currentTime = trimStartTime;
-                }
+                const s = trimStart * audioElement.duration;
+                const e = trimEnd * audioElement.duration;
+                if (audioElement.currentTime < s) audioElement.currentTime = s;
+                if (audioElement.currentTime >= e) audioElement.currentTime = s;
             }
 
             drawWaveform(progress);
@@ -203,114 +190,71 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ─────────────────────────────────────────
-    // TRIM: DRAG HANDLES
-    // ─────────────────────────────────────────
-    function getMouseX(e) {
-        const rect = waveformCanvas.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        return clientX - rect.left;
-    }
-
-    function hitTest(mouseX) {
-        const W = waveformCanvas.width;
-        const startX = trimStart * W;
-        const endX = trimEnd * W;
-        if (Math.abs(mouseX - startX) <= HANDLE_HIT) return 'start';
-        if (Math.abs(mouseX - endX) <= HANDLE_HIT) return 'end';
-        return null;
-    }
-
-    waveformCanvas.addEventListener('mousedown', function (e) {
-        const x = getMouseX(e);
-        const hit = hitTest(x);
-        if (hit) {
-            dragging = hit;
-            waveformCanvas.style.cursor = 'ew-resize';
-        }
-    });
-
-    window.addEventListener('mousemove', function (e) {
-        if (!dragging) {
-            const x = getMouseX(e);
-            waveformCanvas.style.cursor = hitTest(x) ? 'ew-resize' : 'pointer';
-            return;
-        }
-        const W = waveformCanvas.width;
-        const x = getMouseX(e);
-        const fraction = Math.max(0, Math.min(1, x / W));
-
-        if (dragging === 'start') {
-            trimStart = Math.min(fraction, trimEnd - 0.01);
-        } else if (dragging === 'end') {
-            trimEnd = Math.max(fraction, trimStart + 0.01);
-        }
-    });
-
-    window.addEventListener('mouseup', function () {
-        if (dragging) {
-            dragging = null;
-            waveformCanvas.style.cursor = 'pointer';
-            if (audioElement.duration) {
-                const trimStartTime = trimStart * audioElement.duration;
-                const trimEndTime = trimEnd * audioElement.duration;
-                if (audioElement.currentTime < trimStartTime || audioElement.currentTime > trimEndTime) {
-                    audioElement.currentTime = trimStartTime;
-                }
-            }
-        }
-    });
-
-    waveformCanvas.addEventListener('click', function (e) {
-        if (hitTest(getMouseX(e))) return;
-        const rect = waveformCanvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const percent = Math.max(trimStart, Math.min(trimEnd, x / waveformCanvas.width));
-        audioElement.currentTime = percent * audioElement.duration;
-    });
-
-    resetTrimButton.addEventListener('click', function () {
-        trimStart = 0;
-        trimEnd = 1;
-        if (audioElement.duration) audioElement.currentTime = 0;
-    });
-
-    // ─────────────────────────────────────────
-    // WAVEFORM: SIZE CANVAS TO WRAPPER
+    // WAVEFORM: CANVAS RESIZE
     // ─────────────────────────────────────────
     function resizeCanvas() {
         waveformCanvas.width = waveformWrapper.clientWidth;
         waveformCanvas.height = waveformWrapper.clientHeight;
-        if (waveformData) {
-            const progress = audioElement.currentTime / audioElement.duration || 0;
-            drawWaveform(progress);
-        }
+        if (waveformData) drawWaveform(audioElement.currentTime / audioElement.duration || 0);
     }
-
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    // RESET SLIDERS WHEN PLAY FIRST PRESSED
-    function initializeSliders() {
-        speedSlider.value = 1;
-        panSlider.value = 0;
-        volumeSlider.value = 100;
-        updateSliderTextValues();
+    // ─────────────────────────────────────────
+    // TRIM: DRAG HANDLES
+    // ─────────────────────────────────────────
+    function getMouseX(e) {
+        const rect = waveformCanvas.getBoundingClientRect();
+        return (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
     }
 
-    // SYNC SLIDERS TO AUDIO ELEMENT
-    function syncSlidersToAudioElement() {
-        speedSlider.value = audioElement.playbackRate;
-        panSlider.value = panner.pan.value;
-        volumeSlider.value = gainNode.gain.value * 100;
-        updateSliderTextValues();
+    function hitTest(mouseX) {
+        const W = waveformCanvas.width;
+        if (Math.abs(mouseX - trimStart * W) <= HANDLE_HIT) return 'start';
+        if (Math.abs(mouseX - trimEnd * W) <= HANDLE_HIT) return 'end';
+        return null;
     }
 
-    // UPDATES SLIDER TEXT VALUES TO THE CURRENT SLIDER POSITION
-    function updateSliderTextValues() {
-        speedSliderValue.textContent = speedSlider.value;
-        panSliderValue.textContent = panSlider.value;
-        volumeSliderValue.textContent = volumeSlider.value;
-    }
+    waveformCanvas.addEventListener('mousedown', e => {
+        const hit = hitTest(getMouseX(e));
+        if (hit) { dragging = hit; waveformCanvas.style.cursor = 'ew-resize'; }
+    });
+
+    window.addEventListener('mousemove', e => {
+        if (!dragging) {
+            waveformCanvas.style.cursor = hitTest(getMouseX(e)) ? 'ew-resize' : 'pointer';
+            return;
+        }
+        const fraction = Math.max(0, Math.min(1, getMouseX(e) / waveformCanvas.width));
+        if (dragging === 'start') trimStart = Math.min(fraction, trimEnd - 0.01);
+        else trimEnd = Math.max(fraction, trimStart + 0.01);
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (!dragging) return;
+        dragging = null;
+        waveformCanvas.style.cursor = 'pointer';
+        if (audioElement.duration) {
+            const s = trimStart * audioElement.duration;
+            const e = trimEnd * audioElement.duration;
+            if (audioElement.currentTime < s || audioElement.currentTime > e) {
+                audioElement.currentTime = s;
+            }
+        }
+    });
+
+    waveformCanvas.addEventListener('click', e => {
+        if (hitTest(getMouseX(e))) return;
+        const rect = waveformCanvas.getBoundingClientRect();
+        const percent = Math.max(trimStart, Math.min(trimEnd, (e.clientX - rect.left) / waveformCanvas.width));
+        audioElement.currentTime = percent * audioElement.duration;
+    });
+
+    resetTrimButton.addEventListener('click', () => {
+        trimStart = 0;
+        trimEnd = 1;
+        if (audioElement.duration) audioElement.currentTime = 0;
+    });
 
     // ─────────────────────────────────────────
     // EFFECTS HELPERS
@@ -339,25 +283,21 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ─────────────────────────────────────────
-    // WEB AUDIO API START
+    // AUDIO CONTEXT INIT
     // Chain: track → gain → EQ → reverb → delay → distortion → panner → destination
     // ─────────────────────────────────────────
     function initializeContext() {
-        AudioContext = window.AudioContext || window.webkitAudioContext;
-        audioContext = new AudioContext();
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
         track = audioContext.createMediaElementSource(audioElement);
-
         audioElement.preservesPitch = false;
         audioElement.webkitPreservesPitch = false;
         audioElement.loop = true;
 
-        pannerOptions = { pan: 0 };
-        panner = new StereoPannerNode(audioContext, pannerOptions);
-
+        panner = new StereoPannerNode(audioContext, { pan: 0 });
         gainNode = audioContext.createGain();
 
-        // EQ FILTERS
+        // EQ
         bassFilter = audioContext.createBiquadFilter();
         bassFilter.type = 'lowshelf'; bassFilter.frequency.value = 200; bassFilter.gain.value = 0;
         midFilter = audioContext.createBiquadFilter();
@@ -365,14 +305,14 @@ document.addEventListener('DOMContentLoaded', function () {
         trebleFilter = audioContext.createBiquadFilter();
         trebleFilter.type = 'highshelf'; trebleFilter.frequency.value = 4000; trebleFilter.gain.value = 0;
 
-        // REVERB (parallel dry/wet)
+        // Reverb
         reverbNode = audioContext.createConvolver();
         reverbNode.buffer = buildImpulseResponse(audioContext, parseFloat(reverbDecaySlider.value), 2);
         reverbWetGain = audioContext.createGain(); reverbWetGain.gain.value = 0;
         reverbDryGain = audioContext.createGain(); reverbDryGain.gain.value = 1;
         const reverbMix = audioContext.createGain();
 
-        // DELAY (parallel dry/wet)
+        // Delay
         delayNode = audioContext.createDelay(5.0);
         delayNode.delayTime.value = parseFloat(delayTimeSlider.value);
         delayFeedbackGain = audioContext.createGain(); delayFeedbackGain.gain.value = parseFloat(delayFeedbackSlider.value);
@@ -380,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function () {
         delayDryGain = audioContext.createGain(); delayDryGain.gain.value = 1;
         const delayMix = audioContext.createGain();
 
-        // DISTORTION (parallel dry/wet)
+        // Distortion
         distortionNode = audioContext.createWaveShaper();
         distortionNode.curve = buildDistortionCurve(parseFloat(distortionAmountSlider.value));
         distortionNode.oversample = '4x';
@@ -388,19 +328,15 @@ document.addEventListener('DOMContentLoaded', function () {
         distortionDryGain = audioContext.createGain(); distortionDryGain.gain.value = 1;
         const distortionMix = audioContext.createGain();
 
-        // Wire the full chain
+        // Wire chain
         track.connect(gainNode).connect(bassFilter).connect(midFilter).connect(trebleFilter);
-
         trebleFilter.connect(reverbDryGain).connect(reverbMix);
         trebleFilter.connect(reverbNode).connect(reverbWetGain).connect(reverbMix);
-
         reverbMix.connect(delayDryGain).connect(delayMix);
         reverbMix.connect(delayNode).connect(delayWetGain).connect(delayMix);
         delayNode.connect(delayFeedbackGain).connect(delayNode);
-
         delayMix.connect(distortionDryGain).connect(distortionMix);
         delayMix.connect(distortionNode).connect(distortionWetGain).connect(distortionMix);
-
         distortionMix.connect(panner).connect(audioContext.destination);
 
         loadWaveform();
@@ -408,25 +344,126 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ─────────────────────────────────────────
-    // EQ: SLIDER LISTENERS
+    // SLIDER HELPERS
     // ─────────────────────────────────────────
-    bassSlider.addEventListener('input', function () {
+    function initializeSliders() {
+        speedSlider.value = 1;
+        panSlider.value = 0;
+        volumeSlider.value = 100;
+        updateSliderTextValues();
+    }
+
+    function syncSlidersToAudioElement() {
+        speedSlider.value = audioElement.playbackRate;
+        panSlider.value = panner.pan.value;
+        volumeSlider.value = gainNode.gain.value * 100;
+        updateSliderTextValues();
+    }
+
+    function updateSliderTextValues() {
+        volumeSliderValue.textContent = volumeSlider.value + '%';
+        speedSliderValue.textContent = speedSlider.value + 'x';
+        panSliderValue.textContent = panSlider.value;
+    }
+
+    // ─────────────────────────────────────────
+    // PLAY / PAUSE
+    // ─────────────────────────────────────────
+    function togglePlayPause() {
+        if (!isContextInitialized) {
+            initializeContext();
+            isContextInitialized = true;
+        }
+
+        if (!currentlyDownloading) downloadButton.disabled = false;
+
+        if (!slidersInitialized) {
+            initializeSliders();
+            slidersInitialized = true;
+        }
+
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+            syncSlidersToAudioElement();
+        }
+
+        if (playButton.textContent === '▶ Play') {
+            if (audioElement.duration && audioElement.currentTime === 0) {
+                audioElement.currentTime = trimStart * audioElement.duration;
+            }
+            audioElement.play();
+            playButton.textContent = '⏸ Pause';
+        } else {
+            audioElement.pause();
+            playButton.textContent = '▶ Play';
+        }
+    }
+
+    playButton.addEventListener('click', togglePlayPause, false);
+
+    // ─────────────────────────────────────────
+    // SLIDER LISTENERS
+    // ─────────────────────────────────────────
+    volumeSlider.addEventListener('input', () => {
+        updateSliderTextValues();
+        if (gainNode) gainNode.gain.value = parseFloat(volumeSlider.value) / 100;
+    });
+
+    speedSlider.addEventListener('input', () => {
+        updateSliderTextValues();
+        audioElement.playbackRate = parseFloat(speedSlider.value);
+    });
+
+    panSlider.addEventListener('input', () => {
+        updateSliderTextValues();
+        if (panner) panner.pan.value = parseFloat(panSlider.value);
+    });
+
+    autoPanCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            panSliderValue.style.visibility = 'hidden';
+            panSlider.step = 0.01;
+            let currentPanValue = 0;
+            let increment = 0.01;
+            autoPanInterval = setInterval(() => {
+                currentPanValue += increment;
+                if (currentPanValue >= 1 || currentPanValue <= -1) {
+                    increment *= -1;
+                    currentPanValue = currentPanValue >= 1 ? 1 : -1;
+                }
+                panSlider.value = currentPanValue.toFixed(2);
+                panSlider.dispatchEvent(inputEvent);
+                if (!autoPanCheckbox.checked) clearInterval(autoPanInterval);
+            }, 10);
+        } else {
+            panSliderValue.style.visibility = 'visible';
+            panSlider.step = 0.1;
+            clearInterval(autoPanInterval);
+            panSlider.value = 0;
+            panSlider.dispatchEvent(inputEvent);
+        }
+    });
+
+    // ─────────────────────────────────────────
+    // EQ LISTENERS
+    // ─────────────────────────────────────────
+    bassSlider.addEventListener('input', () => {
         bassValue.textContent = (bassSlider.value > 0 ? '+' : '') + bassSlider.value + 'dB';
         if (bassFilter) bassFilter.gain.value = parseFloat(bassSlider.value);
     });
 
-    midSlider.addEventListener('input', function () {
+    midSlider.addEventListener('input', () => {
         midValue.textContent = (midSlider.value > 0 ? '+' : '') + midSlider.value + 'dB';
         if (midFilter) midFilter.gain.value = parseFloat(midSlider.value);
     });
 
-    trebleSlider.addEventListener('input', function () {
+    trebleSlider.addEventListener('input', () => {
         trebleValue.textContent = (trebleSlider.value > 0 ? '+' : '') + trebleSlider.value + 'dB';
         if (trebleFilter) trebleFilter.gain.value = parseFloat(trebleSlider.value);
     });
 
     // ─────────────────────────────────────────
-    // EFFECTS: LISTENERS
+    // EFFECTS LISTENERS
     // ─────────────────────────────────────────
     reverbToggle.addEventListener('change', () => {
         if (!reverbWetGain) return;
@@ -475,150 +512,87 @@ document.addEventListener('DOMContentLoaded', function () {
         if (distortionNode) distortionNode.curve = buildDistortionCurve(parseFloat(distortionAmountSlider.value));
     });
 
-
     // ─────────────────────────────────────────
-    // PLAY/PAUSE TOGGLE (shared logic used by button + keyboard)
+    // RESET ALL
     // ─────────────────────────────────────────
-    function togglePlayPause() {
-        if (!isContextInitialized) {
-            initializeContext();
-            isContextInitialized = true;
+    resetAllButton.addEventListener('click', () => {
+        volumeSlider.value = 100; volumeSlider.dispatchEvent(new Event('input'));
+        speedSlider.value = 1;   speedSlider.dispatchEvent(new Event('input'));
+        panSlider.value = 0;     panSlider.dispatchEvent(new Event('input'));
+
+        if (autoPanCheckbox.checked) {
+            autoPanCheckbox.checked = false;
+            autoPanCheckbox.dispatchEvent(new Event('change'));
         }
 
-        if (!currentlyDownloading) downloadButton.disabled = false;
+        bassSlider.value = 0;   bassSlider.dispatchEvent(new Event('input'));
+        midSlider.value = 0;    midSlider.dispatchEvent(new Event('input'));
+        trebleSlider.value = 0; trebleSlider.dispatchEvent(new Event('input'));
 
-        if (!slidersInitialized) {
-            initializeSliders();
-            slidersInitialized = true;
-        }
+        reverbToggle.checked = false; reverbToggle.dispatchEvent(new Event('change'));
+        reverbMixSlider.value = 30;   reverbMixValue.textContent = '30%';
+        reverbDecaySlider.value = 2;  reverbDecayValue.textContent = '2s';
 
-        if (audioContext.state === "suspended") {
-            audioContext.resume();
-            syncSlidersToAudioElement();
-        }
+        delayToggle.checked = false;   delayToggle.dispatchEvent(new Event('change'));
+        delayTimeSlider.value = 0.3;   delayTimeValue.textContent = '0.3s';
+        delayFeedbackSlider.value = 0.3; delayFeedbackValue.textContent = '30%';
 
-        if (playButton.textContent === "Play") {
-        if (audioElement.duration && audioElement.currentTime === 0) {
-            audioElement.currentTime = trimStart * audioElement.duration;
-        }
-        audioElement.play();
-        playButton.textContent = "Pause";
-        } else {
-            audioElement.pause();
-            playButton.textContent = "Play";
-        }
-    }
+        distortionToggle.checked = false;  distortionToggle.dispatchEvent(new Event('change'));
+        distortionAmountSlider.value = 50; distortionAmountValue.textContent = '50';
 
-    // PLAY BUTTON CLICK
-    playButton.addEventListener("click", togglePlayPause, false);
+        trimStart = 0; trimEnd = 1;
+        if (audioElement.duration) audioElement.currentTime = 0;
+    });
 
     // ─────────────────────────────────────────
     // KEYBOARD SHORTCUTS
     // ─────────────────────────────────────────
-    document.addEventListener('keydown', function (e) {
-        // Ignore if user is typing in an input
-        if (e.target.tagName === 'INPUT') return;
+    document.addEventListener('keydown', e => {
+        const ignoredTypes = ['text', 'password', 'email', 'number', 'search', 'tel', 'url'];
+        if (e.target.tagName === 'INPUT' && ignoredTypes.includes(e.target.type)) return;
+
+        const shortcutKeys = [' ', 'ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'm', 'M', 'r', 'R'];
+        if (shortcutKeys.includes(e.key)) {
+            e.preventDefault();
+            e.target.blur();
+        }
 
         switch (e.key) {
             case ' ':
-                e.preventDefault();
                 togglePlayPause();
                 break;
-
             case 'ArrowRight':
-                e.preventDefault();
-                if (audioElement.duration) {
-                    const newTime = Math.min(audioElement.currentTime + 5, trimEnd * audioElement.duration);
-                    audioElement.currentTime = newTime;
-                }
+                if (audioElement.duration) audioElement.currentTime = Math.min(audioElement.currentTime + 5, trimEnd * audioElement.duration);
                 break;
-
             case 'ArrowLeft':
-                e.preventDefault();
-                if (audioElement.duration) {
-                    const newTime = Math.max(audioElement.currentTime - 5, trimStart * audioElement.duration);
-                    audioElement.currentTime = newTime;
-                }
+                if (audioElement.duration) audioElement.currentTime = Math.max(audioElement.currentTime - 5, trimStart * audioElement.duration);
                 break;
-
-            case 'm':
-            case 'M':
+            case 'm': case 'M':
                 if (gainNode) {
                     const isMuted = gainNode.gain.value === 0;
                     gainNode.gain.value = isMuted ? parseFloat(volumeSlider.value) / 100 : 0;
                     volumeSlider.style.opacity = isMuted ? '0.9' : '0.3';
                 }
                 break;
-
-            case 'r':
-            case 'R':
-                trimStart = 0;
-                trimEnd = 1;
+            case 'r': case 'R':
+                trimStart = 0; trimEnd = 1;
                 if (audioElement.duration) audioElement.currentTime = 0;
                 break;
-
             case 'ArrowUp':
-                e.preventDefault();
                 volumeSlider.value = Math.min(150, parseFloat(volumeSlider.value) + 5);
                 volumeSlider.dispatchEvent(new Event('input'));
                 break;
-
             case 'ArrowDown':
-                e.preventDefault();
                 volumeSlider.value = Math.max(0, parseFloat(volumeSlider.value) - 5);
                 volumeSlider.dispatchEvent(new Event('input'));
                 break;
         }
     });
 
-    // DETECT SPEED SLIDER CHANGE
-    speedSlider.addEventListener('input', function () {
-        updateSliderTextValues();
-        audioElement.playbackRate = parseFloat(speedSlider.value).toFixed(2);
-    });
-
-    // DETECT PAN SLIDER CHANGE
-    panSlider.addEventListener('input', function () {
-        updateSliderTextValues();
-        panner.pan.value = parseFloat(panSlider.value).toFixed(2);
-    });
-
-    // AUTO PAN FUNCTIONALITY
-    autoPanCheckbox.addEventListener('change', function () {
-        if (this.checked) {
-            panSliderValue.style.display = 'none';
-            panSlider.step = 0.01;
-            let currentPanValue = 0;
-            let increment = 0.01;
-            autoPanInterval = setInterval(() => {
-                currentPanValue += increment;
-                if (currentPanValue >= 1 || currentPanValue <= -1) {
-                    increment *= -1;
-                    currentPanValue = currentPanValue >= 1 ? 1 : -1;
-                }
-                panSlider.value = currentPanValue.toFixed(2);
-                panSlider.dispatchEvent(inputEvent);
-                if (!autoPanCheckbox.checked) clearInterval(autoPanInterval);
-            }, 10);
-        } else {
-            panSliderValue.style.display = 'flex';
-            panSlider.step = 0.1;
-            clearInterval(autoPanInterval);
-            panSlider.value = 0;
-            panSlider.dispatchEvent(inputEvent);
-        }
-    });
-
-    // DETECT VOLUME SLIDER CHANGE
-    volumeSlider.addEventListener('input', function () {
-        updateSliderTextValues();
-        gainNode.gain.value = parseFloat(volumeSlider.value).toFixed(2) / 100;
-    });
-
     // ─────────────────────────────────────────
-    // EXPORT: RESPECTS TRIM REGION
+    // EXPORT
     // ─────────────────────────────────────────
-    downloadButton.addEventListener('click', async function () {
+    downloadButton.addEventListener('click', async () => {
         currentlyDownloading = true;
         downloadingConfirmationText.style.display = 'flex';
         differentFileButton.disabled = true;
@@ -628,49 +602,44 @@ document.addEventListener('DOMContentLoaded', function () {
         speedSlider.disabled = true;
         volumeSlider.disabled = true;
 
-        const response = await fetch(audioElement.src);
-        const audioData = await response.arrayBuffer();
-        const audioBuffer = await audioContext.decodeAudioData(audioData);
+        if (!cachedArrayBuffer) {
+            const response = await fetch(audioElement.src);
+            cachedArrayBuffer = await response.arrayBuffer();
+        }
+        const audioBuffer = await audioContext.decodeAudioData(cachedArrayBuffer.slice(0));
 
         const sampleRate = audioBuffer.sampleRate;
         const trimStartSample = Math.floor(trimStart * audioBuffer.length);
         const trimEndSample = Math.floor(trimEnd * audioBuffer.length);
         const trimmedLength = trimEndSample - trimStartSample;
-
         const playbackSpeed = parseFloat(speedSlider.value) / 2;
         const adjustedLength = Math.ceil(trimmedLength / playbackSpeed);
 
         const offlineContext = new OfflineAudioContext({
             numberOfChannels: audioBuffer.numberOfChannels,
             length: adjustedLength,
-            sampleRate: sampleRate
+            sampleRate
         });
 
         const trimmedBuffer = offlineContext.createBuffer(audioBuffer.numberOfChannels, trimmedLength, sampleRate);
-
-        for (let channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
-            const src = audioBuffer.getChannelData(channel);
-            const dst = trimmedBuffer.getChannelData(channel);
-            for (let i = 0; i < trimmedLength; i++) {
-                dst[i] = src[trimStartSample + i];
-            }
+        for (let ch = 0; ch < audioBuffer.numberOfChannels; ch++) {
+            const src = audioBuffer.getChannelData(ch);
+            const dst = trimmedBuffer.getChannelData(ch);
+            for (let i = 0; i < trimmedLength; i++) dst[i] = src[trimStartSample + i];
         }
 
         const sourceNode = offlineContext.createBufferSource();
         sourceNode.buffer = trimmedBuffer;
 
-        // EQ in export chain
-        const bassExport = offlineContext.createBiquadFilter();
-        bassExport.type = 'lowshelf'; bassExport.frequency.value = 200;
-        bassExport.gain.value = parseFloat(bassSlider.value);
-        const midExport = offlineContext.createBiquadFilter();
-        midExport.type = 'peaking'; midExport.frequency.value = 1000; midExport.Q.value = 1;
-        midExport.gain.value = parseFloat(midSlider.value);
-        const trebleExport = offlineContext.createBiquadFilter();
-        trebleExport.type = 'highshelf'; trebleExport.frequency.value = 4000;
-        trebleExport.gain.value = parseFloat(trebleSlider.value);
+        // EQ
+        const bassEx = offlineContext.createBiquadFilter();
+        bassEx.type = 'lowshelf'; bassEx.frequency.value = 200; bassEx.gain.value = parseFloat(bassSlider.value);
+        const midEx = offlineContext.createBiquadFilter();
+        midEx.type = 'peaking'; midEx.frequency.value = 1000; midEx.Q.value = 1; midEx.gain.value = parseFloat(midSlider.value);
+        const trebleEx = offlineContext.createBiquadFilter();
+        trebleEx.type = 'highshelf'; trebleEx.frequency.value = 4000; trebleEx.gain.value = parseFloat(trebleSlider.value);
 
-        // Reverb in export chain
+        // Reverb
         const reverbEx = offlineContext.createConvolver();
         reverbEx.buffer = buildImpulseResponse(offlineContext, parseFloat(reverbDecaySlider.value), 2);
         const reverbWetEx = offlineContext.createGain();
@@ -679,32 +648,27 @@ document.addEventListener('DOMContentLoaded', function () {
         const reverbMixVal = reverbToggle.checked ? parseFloat(reverbMixSlider.value) / 100 : 0;
         reverbWetEx.gain.value = reverbMixVal; reverbDryEx.gain.value = 1 - reverbMixVal;
 
-        // Delay in export chain
+        // Delay
         const delayEx = offlineContext.createDelay(5.0);
         delayEx.delayTime.value = parseFloat(delayTimeSlider.value);
-        const delayFbEx = offlineContext.createGain();
-        delayFbEx.gain.value = parseFloat(delayFeedbackSlider.value);
-        const delayWetEx = offlineContext.createGain();
-        const delayDryEx = offlineContext.createGain();
+        const delayFbEx = offlineContext.createGain(); delayFbEx.gain.value = parseFloat(delayFeedbackSlider.value);
+        const delayWetEx = offlineContext.createGain(); const delayDryEx = offlineContext.createGain();
         const delayMixEx = offlineContext.createGain();
         delayWetEx.gain.value = delayToggle.checked ? 0.5 : 0; delayDryEx.gain.value = 1;
 
-        // Distortion in export chain
+        // Distortion
         const distEx = offlineContext.createWaveShaper();
-        distEx.curve = buildDistortionCurve(parseFloat(distortionAmountSlider.value));
-        distEx.oversample = '4x';
-        const distWetEx = offlineContext.createGain();
-        const distDryEx = offlineContext.createGain();
+        distEx.curve = buildDistortionCurve(parseFloat(distortionAmountSlider.value)); distEx.oversample = '4x';
+        const distWetEx = offlineContext.createGain(); const distDryEx = offlineContext.createGain();
         const distMixEx = offlineContext.createGain();
         distWetEx.gain.value = distortionToggle.checked ? 1 : 0;
         distDryEx.gain.value = distortionToggle.checked ? 0 : 1;
 
-        const gainNodeExport = offlineContext.createGain();
-        gainNodeExport.gain.value = parseFloat(volumeSlider.value) / 100;
+        const gainEx = offlineContext.createGain(); gainEx.gain.value = parseFloat(volumeSlider.value) / 100;
 
-        sourceNode.connect(gainNodeExport).connect(bassExport).connect(midExport).connect(trebleExport);
-        trebleExport.connect(reverbDryEx).connect(reverbMixEx);
-        trebleExport.connect(reverbEx).connect(reverbWetEx).connect(reverbMixEx);
+        sourceNode.connect(gainEx).connect(bassEx).connect(midEx).connect(trebleEx);
+        trebleEx.connect(reverbDryEx).connect(reverbMixEx);
+        trebleEx.connect(reverbEx).connect(reverbWetEx).connect(reverbMixEx);
         reverbMixEx.connect(delayDryEx).connect(delayMixEx);
         reverbMixEx.connect(delayEx).connect(delayWetEx).connect(delayMixEx);
         delayEx.connect(delayFbEx).connect(delayEx);
@@ -715,54 +679,42 @@ document.addEventListener('DOMContentLoaded', function () {
         sourceNode.playbackRate.value = playbackSpeed;
         sourceNode.start();
 
-        offlineContext.startRendering().then(function (renderedBuffer) {
-            const audioBlob = bufferToBlob(renderedBuffer);
-            const downloadLink = document.createElement("a");
-            downloadLink.href = URL.createObjectURL(audioBlob);
-            downloadLink.download = fileNameWithoutExtension + "[ML].wav";
-            downloadingConfirmationText.textContent = "Exported Successfully!";
-            downloadLink.click();
+        offlineContext.startRendering().then(renderedBuffer => {
+            const blob = bufferToBlob(renderedBuffer);
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileNameWithoutExtension + '[ML].wav';
+            downloadingConfirmationText.textContent = 'Exported Successfully!';
+            link.click();
             homeRedirectButton.click();
             downloadButton.disabled = true;
         });
     });
 
+    // ─────────────────────────────────────────
+    // WAV ENCODING
+    // ─────────────────────────────────────────
     function bufferToBlob(renderedBuffer) {
-        const numberOfChannels = renderedBuffer.numberOfChannels;
-        const length = renderedBuffer.length;
-        const sampleRate = renderedBuffer.sampleRate;
-
+        const { numberOfChannels, length, sampleRate } = renderedBuffer;
         const wavBuffer = new ArrayBuffer(44 + length * 2);
         const view = new DataView(wavBuffer);
 
-        writeString(view, 0, 'RIFF');
-        view.setUint32(4, 36 + length * 2, true);
-        writeString(view, 8, 'WAVE');
-        writeString(view, 12, 'fmt ');
-        view.setUint32(16, 16, true);
-        view.setUint16(20, 1, true);
-        view.setUint16(22, numberOfChannels, true);
-        view.setUint32(24, sampleRate, true);
-        view.setUint32(28, sampleRate * 4, true);
-        view.setUint16(32, numberOfChannels * 2, true);
-        view.setUint16(34, 16, true);
-        writeString(view, 36, 'data');
-        view.setUint32(40, length * 2, true);
+        writeString(view, 0, 'RIFF'); view.setUint32(4, 36 + length * 2, true);
+        writeString(view, 8, 'WAVE'); writeString(view, 12, 'fmt ');
+        view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+        view.setUint16(22, numberOfChannels, true); view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * 4, true); view.setUint16(32, numberOfChannels * 2, true);
+        view.setUint16(34, 16, true); writeString(view, 36, 'data'); view.setUint32(40, length * 2, true);
 
-        const offset = 44;
         const channelData = renderedBuffer.getChannelData(0);
-
         for (let i = 0; i < length; i++) {
-            const sample = Math.max(-1, Math.min(1, channelData[i]));
-            view.setInt16(offset + i * 2, sample * 0x7FFF, true);
+            view.setInt16(44 + i * 2, Math.max(-1, Math.min(1, channelData[i])) * 0x7FFF, true);
         }
-
         return new Blob([view], { type: 'audio/wav' });
     }
 
     function writeString(view, offset, string) {
-        for (let i = 0; i < string.length; i++) {
-            view.setUint8(offset + i, string.charCodeAt(i));
-        }
+        for (let i = 0; i < string.length; i++) view.setUint8(offset + i, string.charCodeAt(i));
     }
+
 });

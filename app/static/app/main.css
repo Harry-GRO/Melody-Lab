@@ -275,6 +275,14 @@ body {
     white-space: nowrap;
 }
 
+@keyframes pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+}
+#waveformLoadingText {
+    animation: pulse 1.2s ease-in-out infinite;
+}
+
 #trimBar {
     display: flex;
     align-items: center;
